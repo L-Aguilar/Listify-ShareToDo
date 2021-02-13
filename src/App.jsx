@@ -15,7 +15,7 @@ function App() {
       <Router>
         <Switch>
           <Route exact path="/">
-            
+            <NewList />
           </Route>
           <Route path="/newList">
             <NewList />
