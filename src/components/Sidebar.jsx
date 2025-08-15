@@ -17,6 +17,8 @@ function Sidebar() {
     const [tarea, setTarea] = useState(form.tarea)
     const [descripcion, setDescripcion] = useState(form.descripcion);
     const [link, setLink] = useState(form.link);
+    const [archivo, setArchivo] = useState(form.archivo);
+    const [nombreArchivo, setNombreArchivo] = useState(form.nombreArchivo);
 
     useEffect(() => {
       if(editar){
@@ -24,6 +26,8 @@ function Sidebar() {
         setTarea(form.tarea);
         setDescripcion(form.descripcion);
         setLink(form.link);
+        setArchivo(form.archivo);
+        setNombreArchivo(form.nombreArchivo);
         setModoEdicion(true)
         dispatch(editarAccion(false))
       }
@@ -31,7 +35,7 @@ function Sidebar() {
 
     useEffect(() => {
       cargarDatos()
-    }, [tarea, descripcion, link])
+    }, [tarea, descripcion, link, archivo, nombreArchivo])
 
     const dispatch = useDispatch()
 
@@ -58,25 +62,46 @@ function Sidebar() {
 
     function crearTarea() {
       const id = shortid.generate()
-      dispatch(crearTareaAccion(id, tarea, descripcion, link ))
+      dispatch(crearTareaAccion(id, tarea, descripcion, link, false, archivo, nombreArchivo ))
       limpiarState()
     }
 
     const actualizarTarea = () =>{
-        dispatch(actualizarTareaAccion(id, tarea, descripcion, link, form.status ))
+        dispatch(actualizarTareaAccion(id, tarea, descripcion, link, form.status, archivo, nombreArchivo ))
         limpiarState()
     }
 
     const cargarDatos = () =>{
-      dispatch(cargarDatosAccion(id,tarea, descripcion, link, form.status))
+      dispatch(cargarDatosAccion(id,tarea, descripcion, link, form.status, archivo, nombreArchivo))
     }
 
     const limpiarState = () =>{
         setTarea('');
         setDescripcion('');
         setLink('');
+        setArchivo(null);
+        setNombreArchivo('');
         setModoEdicion(false);
         dispatch(mensajeErrorAccion(null))
+    }
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Validar tipo de archivo
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'text/plain', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+            if (allowedTypes.includes(file.type)) {
+                // Validar tamaño (máximo 5MB)
+                if (file.size <= 5 * 1024 * 1024) {
+                    setArchivo(file);
+                    setNombreArchivo(file.name);
+                } else {
+                    dispatch(mensajeErrorAccion('El archivo es demasiado grande. Máximo 5MB permitido.'));
+                }
+            } else {
+                dispatch(mensajeErrorAccion('Tipo de archivo no permitido. Solo se permiten: PDF, imágenes, documentos de texto y Word.'));
+            }
+        }
     }
 
     return (
@@ -118,6 +143,57 @@ function Sidebar() {
                     onChange={ e => setLink(e.target.value)}
                     value={form.link}
                     />
+                </div>
+
+                <div className="form-group">
+                    <label className="form-label mb-2">Archivo adjunto (opcional)</label>
+                    <div className="custom-file-upload">
+                        <input 
+                            type="file"
+                            id="fileInput"
+                            className="file-input-hidden"
+                            onChange={handleFileChange}
+                            accept=".pdf,.jpg,.jpeg,.png,.gif,.txt,.doc,.docx"
+                        />
+                        <label htmlFor="fileInput" className="file-input-label">
+                            {nombreArchivo ? (
+                                <div className="file-selected">
+                                    {archivo && archivo.type.startsWith('image/') ? (
+                                        <img 
+                                            src={URL.createObjectURL(archivo)} 
+                                            alt="Preview" 
+                                            className="file-thumbnail"
+                                        />
+                                    ) : (
+                                        <div className="file-icon">
+                                            {archivo && archivo.type === 'application/pdf' ? (
+                                                <i className="fas fa-file-pdf"></i>
+                                            ) : (
+                                                <i className="fas fa-file"></i>
+                                            )}
+                                        </div>
+                                    )}
+                                    <span className="file-name">{nombreArchivo}</span>
+                                    <button 
+                                        type="button" 
+                                        className="file-remove-btn"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setArchivo(null);
+                                            setNombreArchivo('');
+                                        }}
+                                    >
+                                        <i className="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="file-placeholder">
+                                    <i className="fas fa-cloud-upload-alt"></i>
+                                    <span>Subir archivo</span>
+                                </div>
+                            )}
+                        </label>
+                    </div>
                 </div>
                 {
                   modoEdicion ? (

@@ -8,7 +8,9 @@ const dataInicial = {
         tarea:'',
         descripcion:'',
         link:'',
-        status:''
+        status:'',
+        archivo: null,
+        nombreArchivo: ''
     },
     editar:false,
     error:null
@@ -60,27 +62,27 @@ export const editarAccion = (editar) => (dispatch) => {
     })
 }
 
-export const cargarDatosAccion = (id, tarea, descripcion, link, status) => (dispatch) => {
+export const cargarDatosAccion = (id, tarea, descripcion, link, status, archivo, nombreArchivo) => (dispatch) => {
     dispatch({
         type: CARGAR_DATOS,
-        payload:{id, tarea, descripcion, link, status}
+        payload:{id, tarea, descripcion, link, status, archivo, nombreArchivo}
     })
 }
 
-export const crearTareaAccion = (id, tarea, descripcion, link, status = false) => (dispatch) => {
+export const crearTareaAccion = (id, tarea, descripcion, link, status = false, archivo = null, nombreArchivo = '') => (dispatch) => {
     dispatch({
         type:CREAR_TAREA,
         payload: {
-            id, tarea, descripcion, link, status
+            id, tarea, descripcion, link, status, archivo, nombreArchivo
         }
     })
     dispatch(limpiarFormAccion())
 }
 
-export const actualizarTareaAccion = (id, tarea, descripcion, link, status) => (dispatch) => {
+export const actualizarTareaAccion = (id, tarea, descripcion, link, status, archivo, nombreArchivo) => (dispatch) => {
     dispatch({
         type: ACTUALIZAR_TAREA,
-        payload:{id, tarea, descripcion, link, status}
+        payload:{id, tarea, descripcion, link, status, archivo, nombreArchivo}
     })
 }
 
@@ -91,7 +93,9 @@ export const limpiarFormAccion = () => (dispatch) => {
             id:'',
             tarea:'',
             descripcion:'',
-            link:''
+            link:'',
+            archivo: null,
+            nombreArchivo: ''
         }
     })
 }

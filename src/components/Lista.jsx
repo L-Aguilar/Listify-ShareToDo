@@ -19,7 +19,7 @@ function Lista({box}) {
      const cargarForm = item => {
        console.log(item);
        dispatch(editarAccion(true))
-       dispatch(cargarDatosAccion(item.id, item.tarea, item.descripcion, item.link, item.status))
+       dispatch(cargarDatosAccion(item.id, item.tarea, item.descripcion, item.link, item.status, item.archivo, item.nombreArchivo))
      }
 
      const actualizarStatus = (e,item) => {
@@ -37,46 +37,93 @@ function Lista({box}) {
               ) : (
                 tareas.map(item => (
                   <li className="list-group-item" key={item.id}>
-                    <div className="row align-items-center">
+                    <div className="row align-items-start">
                       {
                         box ? (
-                        <div className="col-1">
+                        <div className="col-auto pr-2">
                             <input type="checkbox" onChange={e => actualizarStatus(e.target.checked, item)} checked={ item.status || false } id="checkBox"/>
                         </div>
                         ):(
-                          <div className="col-1"></div>
+                          <div className="col-auto pr-2"></div>
                         )
                       }
-                        <div className="col-7 descripcion px-0">
-                            <div>
-                                <b>{item.tarea}</b>
-                                <p className="m-0 text-break">{item.descripcion}</p>
+                        <div className="col flex-grow-1 content-area">
+                            <div className="item-content">
+                                <h6 className="item-title mb-1">{item.tarea}</h6>
+                                {item.descripcion && (
+                                    <p className="item-description mb-2">{item.descripcion}</p>
+                                )}
+                                {item.nombreArchivo && (
+                                    <div className="file-attachment">
+                                        {item.archivo && item.archivo.type.startsWith('image/') ? (
+                                            <div className="file-preview">
+                                                <img 
+                                                    src={URL.createObjectURL(item.archivo)} 
+                                                    alt="Preview" 
+                                                    className="file-thumbnail-small"
+                                                />
+                                                <span className="file-name-small">{item.nombreArchivo}</span>
+                                            </div>
+                                        ) : (
+                                            <div className="file-preview">
+                                                <div className="file-icon-small">
+                                                    {item.archivo && item.archivo.type === 'application/pdf' ? (
+                                                        <i className="fas fa-file-pdf"></i>
+                                                    ) : (
+                                                        <i className="fas fa-file"></i>
+                                                    )}
+                                                </div>
+                                                <span className="file-name-small">{item.nombreArchivo}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
 
-                        <div className="col-4">
-                            {
-                                
-                                item.link !== '' ? (
-                                    <a className="btn btn-primary btn-sm float-right mx-2"
+                        <div className="col-auto buttons-container">
+                            <div className="buttons-row">
+                                {item.archivo && (
+                                    <button 
+                                        className="btn btn-info btn-sm"
+                                        onClick={() => {
+                                            const url = URL.createObjectURL(item.archivo);
+                                            const a = document.createElement('a');
+                                            a.href = url;
+                                            a.download = item.nombreArchivo;
+                                            document.body.appendChild(a);
+                                            a.click();
+                                            document.body.removeChild(a);
+                                            URL.revokeObjectURL(url);
+                                        }}
+                                        title="Descargar archivo"
+                                    >
+                                        <i className="fas fa-download"></i>
+                                    </button>
+                                )}
+                                {item.link && (
+                                    <a className="btn btn-primary btn-sm"
                                     href={item.link}
                                     role="button"
-                                    // eslint-disable-next-line react/jsx-no-target-blank
-                                    target="_blank">
-                                      Link</a>
-                                ) : (null)
-                            }
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    title="Abrir enlace">
+                                        <i className="fas fa-external-link-alt"></i>
+                                    </a>
+                                )}
                                 <button 
-                                onClick={()=> eliminarTarea(item.id)}
-                                className="button-danger btn-sm float-right mx-2">
-                                    Eliminar
+                                    onClick={()=> cargarForm(item)}
+                                    className="btn btn-warning btn-sm"
+                                    title="Editar item">
+                                    <i className="fas fa-edit"></i>
                                 </button>
-                
-                                <button
-                                onClick={()=> cargarForm(item)}
-                                className="button-warning btn-sm float-right">
-                                    Editar
+                                <button 
+                                    onClick={()=> eliminarTarea(item.id)}
+                                    className="btn btn-danger btn-sm"
+                                    title="Eliminar item">
+                                    <i className="fas fa-trash"></i>
                                 </button>
+                            </div>
                         </div>
                     </div>
                   </li>
