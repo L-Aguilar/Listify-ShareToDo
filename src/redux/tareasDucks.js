@@ -10,10 +10,17 @@ const dataInicial = {
         link:'',
         status:'',
         archivo: null,
-        nombreArchivo: ''
+        nombreArchivo: '',
+        categoria: 'trabajo',
+        prioridad: 'media'
     },
     editar:false,
-    error:null
+    error:null,
+    filtros: {
+        categoria: 'todas',
+        prioridad: 'todas',
+        texto: ''
+    }
 }
 
 //Type
@@ -26,6 +33,8 @@ const ACTUALIZAR_STATUS = 'ACTUALIZAR_STATUS'
 const LIMPIAR_FORM = 'LIMPIAR_FORM'
 const MENSAJE_ERROR = 'MENSAJE_ERROR'
 const ELIMINAR_TAREA = 'ELIMINAR_TAREA'
+const ACTUALIZAR_FILTROS = 'ACTUALIZAR_FILTROS'
+const LIMPIAR_FILTROS = 'LIMPIAR_FILTROS'
 
 //Reducer
 export default function tareaReducer(state = dataInicial, action ){
@@ -48,6 +57,10 @@ export default function tareaReducer(state = dataInicial, action ){
             return {...state, lista_tareas: action.payload}
         case MENSAJE_ERROR:
             return{...state, error: action.payload}
+        case ACTUALIZAR_FILTROS:
+            return{...state, filtros: {...state.filtros, ...action.payload}}
+        case LIMPIAR_FILTROS:
+            return{...state, filtros: {categoria: 'todas', prioridad: 'todas', texto: ''}}
         default:
             return {...state};
     }
@@ -62,27 +75,27 @@ export const editarAccion = (editar) => (dispatch) => {
     })
 }
 
-export const cargarDatosAccion = (id, tarea, descripcion, link, status, archivo, nombreArchivo) => (dispatch) => {
+export const cargarDatosAccion = (id, tarea, descripcion, link, status, archivo, nombreArchivo, categoria, prioridad) => (dispatch) => {
     dispatch({
         type: CARGAR_DATOS,
-        payload:{id, tarea, descripcion, link, status, archivo, nombreArchivo}
+        payload:{id, tarea, descripcion, link, status, archivo, nombreArchivo, categoria, prioridad}
     })
 }
 
-export const crearTareaAccion = (id, tarea, descripcion, link, status = false, archivo = null, nombreArchivo = '') => (dispatch) => {
+export const crearTareaAccion = (id, tarea, descripcion, link, status = false, archivo = null, nombreArchivo = '', categoria = 'trabajo', prioridad = 'media') => (dispatch) => {
     dispatch({
         type:CREAR_TAREA,
         payload: {
-            id, tarea, descripcion, link, status, archivo, nombreArchivo
+            id, tarea, descripcion, link, status, archivo, nombreArchivo, categoria, prioridad
         }
     })
     dispatch(limpiarFormAccion())
 }
 
-export const actualizarTareaAccion = (id, tarea, descripcion, link, status, archivo, nombreArchivo) => (dispatch) => {
+export const actualizarTareaAccion = (id, tarea, descripcion, link, status, archivo, nombreArchivo, categoria, prioridad) => (dispatch) => {
     dispatch({
         type: ACTUALIZAR_TAREA,
-        payload:{id, tarea, descripcion, link, status, archivo, nombreArchivo}
+        payload:{id, tarea, descripcion, link, status, archivo, nombreArchivo, categoria, prioridad}
     })
 }
 
@@ -95,8 +108,23 @@ export const limpiarFormAccion = () => (dispatch) => {
             descripcion:'',
             link:'',
             archivo: null,
-            nombreArchivo: ''
+            nombreArchivo: '',
+            categoria: 'trabajo',
+            prioridad: 'media'
         }
+    })
+}
+
+export const actualizarFiltrosAccion = (filtros) => (dispatch) => {
+    dispatch({
+        type: ACTUALIZAR_FILTROS,
+        payload: filtros
+    })
+}
+
+export const limpiarFiltrosAccion = () => (dispatch) => {
+    dispatch({
+        type: LIMPIAR_FILTROS
     })
 }
 
@@ -165,3 +193,37 @@ export const mensajeErrorAccion = (mensaje) => (dispatch) => {
         payload: mensaje
     })
 }
+
+// Selector para obtener tareas filtradas
+export const getTareasFiltradas = (state) => {
+    const { lista_tareas, filtros } = state.tareas;
+    
+    if (!lista_tareas || lista_tareas.length === 0) {
+        return [];
+    }
+    
+    return lista_tareas.filter(tarea => {
+        // Filtro por categoría
+        if (filtros.categoria !== 'todas' && tarea.categoria !== filtros.categoria) {
+            return false;
+        }
+        
+        // Filtro por prioridad
+        if (filtros.prioridad !== 'todas' && tarea.prioridad !== filtros.prioridad) {
+            return false;
+        }
+        
+        // Filtro por texto
+        if (filtros.texto && filtros.texto.trim() !== '') {
+            const texto = filtros.texto.toLowerCase();
+            const titulo = (tarea.tarea || '').toLowerCase();
+            const descripcion = (tarea.descripcion || '').toLowerCase();
+            
+            if (!titulo.includes(texto) && !descripcion.includes(texto)) {
+                return false;
+            }
+        }
+        
+        return true;
+    });
+};

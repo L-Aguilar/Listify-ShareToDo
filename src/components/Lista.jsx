@@ -1,11 +1,12 @@
 import React, {useState, useEffect} from 'react';
 
 import {useDispatch, useSelector} from 'react-redux'
-import { cargarDatosAccion, editarAccion, actualizarStatusAccion, eliminarTareaAccion} from '../redux/tareasDucks'
+import { cargarDatosAccion, editarAccion, actualizarStatusAccion, eliminarTareaAccion, getTareasFiltradas} from '../redux/tareasDucks'
+import { CATEGORIAS, PRIORIDADES } from '../constants/categories'
 
 function Lista({box}) {
     const dispatch = useDispatch()
-    const tareas = useSelector(store => store.tareas.lista_tareas)
+    const tareas = useSelector(getTareasFiltradas)
 
     const [status, setStatus] = useState('')
 
@@ -19,12 +20,32 @@ function Lista({box}) {
      const cargarForm = item => {
        console.log(item);
        dispatch(editarAccion(true))
-       dispatch(cargarDatosAccion(item.id, item.tarea, item.descripcion, item.link, item.status, item.archivo, item.nombreArchivo))
+       dispatch(cargarDatosAccion(item.id, item.tarea, item.descripcion, item.link, item.status, item.archivo, item.nombreArchivo, item.categoria, item.prioridad))
      }
 
      const actualizarStatus = (e,item) => {
        dispatch(actualizarStatusAccion(e, item.id))
      }
+
+     // Función para obtener el estilo de la categoría
+     const getCategoriaStyle = (categoria) => {
+       const cat = CATEGORIAS[categoria] || CATEGORIAS.trabajo;
+       return {
+         backgroundColor: cat.bgColor,
+         color: cat.color,
+         borderColor: cat.color
+       };
+     };
+
+     // Función para obtener el estilo de la prioridad
+     const getPrioridadStyle = (prioridad) => {
+       const prio = PRIORIDADES[prioridad] || PRIORIDADES.media;
+       return {
+         backgroundColor: prio.bgColor,
+         color: prio.color,
+         borderColor: prio.color
+       };
+     };
 
     return (
         <>
@@ -49,7 +70,25 @@ function Lista({box}) {
                       }
                         <div className="col flex-grow-1 content-area">
                             <div className="item-content">
-                                <h6 className="item-title mb-1">{item.tarea}</h6>
+                                <div className="item-header mb-2">
+                                    <h6 className="item-title mb-1">{item.tarea}</h6>
+                                    <div className="item-tags">
+                                        <span 
+                                            className="badge categoria-badge me-2" 
+                                            style={getCategoriaStyle(item.categoria)}
+                                        >
+                                            <i className={`fas ${CATEGORIAS[item.categoria]?.icon || 'fa-tag'}`}></i>
+                                            {CATEGORIAS[item.categoria]?.nombre || 'Sin categoría'}
+                                        </span>
+                                        <span 
+                                            className="badge prioridad-badge" 
+                                            style={getPrioridadStyle(item.prioridad)}
+                                        >
+                                            <i className={`fas ${PRIORIDADES[item.prioridad]?.icon || 'fa-flag'}`}></i>
+                                            {PRIORIDADES[item.prioridad]?.nombre || 'Sin prioridad'}
+                                        </span>
+                                    </div>
+                                </div>
                                 {item.descripcion && (
                                     <p className="item-description mb-2">{item.descripcion}</p>
                                 )}

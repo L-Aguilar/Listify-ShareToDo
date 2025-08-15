@@ -6,6 +6,8 @@ import {useDispatch, useSelector} from 'react-redux'
 import {crearTareaAccion, cargarDatosAccion,
   editarAccion, actualizarTareaAccion, mensajeErrorAccion} from '../redux/tareasDucks'
 
+import {CATEGORIAS, PRIORIDADES} from '../constants/categories'
+
 function Sidebar() {
 
     const form = useSelector(store => store.tareas.data_form)
@@ -19,6 +21,8 @@ function Sidebar() {
     const [link, setLink] = useState(form.link);
     const [archivo, setArchivo] = useState(form.archivo);
     const [nombreArchivo, setNombreArchivo] = useState(form.nombreArchivo);
+    const [categoria, setCategoria] = useState(form.categoria);
+    const [prioridad, setPrioridad] = useState(form.prioridad);
 
     useEffect(() => {
       if(editar){
@@ -28,6 +32,8 @@ function Sidebar() {
         setLink(form.link);
         setArchivo(form.archivo);
         setNombreArchivo(form.nombreArchivo);
+        setCategoria(form.categoria);
+        setPrioridad(form.prioridad);
         setModoEdicion(true)
         dispatch(editarAccion(false))
       }
@@ -35,7 +41,7 @@ function Sidebar() {
 
     useEffect(() => {
       cargarDatos()
-    }, [tarea, descripcion, link, archivo, nombreArchivo])
+    }, [tarea, descripcion, link, archivo, nombreArchivo, categoria, prioridad])
 
     const dispatch = useDispatch()
 
@@ -62,17 +68,17 @@ function Sidebar() {
 
     function crearTarea() {
       const id = shortid.generate()
-      dispatch(crearTareaAccion(id, tarea, descripcion, link, false, archivo, nombreArchivo ))
+      dispatch(crearTareaAccion(id, tarea, descripcion, link, false, archivo, nombreArchivo, categoria, prioridad ))
       limpiarState()
     }
 
     const actualizarTarea = () =>{
-        dispatch(actualizarTareaAccion(id, tarea, descripcion, link, form.status, archivo, nombreArchivo ))
+        dispatch(actualizarTareaAccion(id, tarea, descripcion, link, form.status, archivo, nombreArchivo, categoria, prioridad ))
         limpiarState()
     }
 
     const cargarDatos = () =>{
-      dispatch(cargarDatosAccion(id,tarea, descripcion, link, form.status, archivo, nombreArchivo))
+      dispatch(cargarDatosAccion(id,tarea, descripcion, link, form.status, archivo, nombreArchivo, categoria, prioridad))
     }
 
     const limpiarState = () =>{
@@ -81,6 +87,8 @@ function Sidebar() {
         setLink('');
         setArchivo(null);
         setNombreArchivo('');
+        setCategoria('trabajo');
+        setPrioridad('media');
         setModoEdicion(false);
         dispatch(mensajeErrorAccion(null))
     }
@@ -193,6 +201,41 @@ function Sidebar() {
                                 </div>
                             )}
                         </label>
+                    </div>
+                </div>
+
+                <div className="row">
+                    <div className="col-6">
+                        <div className="form-group">
+                            <label className="form-label mb-2">Categoría</label>
+                            <select 
+                                className="form-control"
+                                value={categoria}
+                                onChange={(e) => setCategoria(e.target.value)}
+                            >
+                                {Object.entries(CATEGORIAS).map(([key, cat]) => (
+                                    <option key={key} value={key}>
+                                        {cat.nombre}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                    <div className="col-6">
+                        <div className="form-group">
+                            <label className="form-label mb-2">Prioridad</label>
+                            <select 
+                                className="form-control"
+                                value={prioridad}
+                                onChange={(e) => setPrioridad(e.target.value)}
+                            >
+                                {Object.entries(PRIORIDADES).map(([key, prio]) => (
+                                    <option key={key} value={key}>
+                                        {prio.nombre}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
                     </div>
                 </div>
                 {

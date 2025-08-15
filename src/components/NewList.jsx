@@ -4,6 +4,7 @@ import '../scss/main.scss';
 import Lista from './Lista';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
+import Filtros from './Filtros';
 import { useToasts } from 'react-toast-notifications'
 
 import {eliminarListaAccion, crearListaAccion, actualizarListaAccion} from '../redux/listaDucks'
@@ -64,6 +65,7 @@ useEffect(() => {
           <div className="col-8 mt-5">
 
             <Topbar/>     
+            <Filtros />
             <Lista
               box={box}
             />
